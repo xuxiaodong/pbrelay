@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# name     : pbrelay, pinboard relay
+# author   : Xu Xiaodong <xxdlhy@gmail.com>
+# created  : 2014 Sep 10
+# modified : 2014 Sep 10
+#
+
+'''
+pbrelay - pinboard relay
+
+Usage:
+    pbrelay <url> <title> <description> [<tag>]
+
+Example:
+    pbrelay 'http://domain.com' 'title' 'description'
+    pbrelay 'http://domain.com' 'title' 'description' 'tag tag ...'
+'''
+
+import os
+import sys
+import ConfigParser
+
+import pinboard
+
+
+config = ConfigParser.RawConfigParser()
+home = os.environ['HOME']
+config.read(home + '/.pbrelayrc')
+
+USER = config.get('pbrelay', 'user')
+TOKEN = config.get('pbrelay', 'token')
+
+
+def post_pin(url, title, description, tags=None):
+    pb = pinboard.open(token=USER + ':' + TOKEN)
+    if tags:
+        tags = tags.split()
+        tags = tuple(tags)
+        pb.add(url, title, description, tags=tags)
+    pb.add(url, title, description)
+
+
+if __name__ == '__main__':
+    args = len(sys.argv) - 1
+    if args == 3:
+        url, title, description = sys.argv[1:]
+        post_pin(url, title, description)
+    elif args == 4:
+        url, title, description, tags = sys.argv[1:]
+        post_pin(url, title, description, tags)
+    else:
+        print(__doc__)
+        sys.exit(1)
